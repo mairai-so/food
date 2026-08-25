@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Zap } from "lucide-react";
 import { useTranslation } from "../i18n/IdiomaContext";
+import PasskeyPrompt from "../components/PasskeyPrompt";
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(true);
+  const [passkeyToken, setPasskeyToken] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -23,7 +25,7 @@ export default function LoginPage() {
         const otherStorage = rememberDevice ? sessionStorage : localStorage;
         otherStorage.removeItem("gestor_token");
         storage.setItem("gestor_token", data.token);
-        setLocation("/dashboard");
+        setPasskeyToken(data.token);
       },
       onError: (error) => {
         const errData = error as { data?: { error?: string } };
@@ -110,6 +112,7 @@ export default function LoginPage() {
           </Button>
         </form>
       </div>
+      {passkeyToken && <PasskeyPrompt token={passkeyToken} onDone={() => setLocation("/dashboard")} />}
     </div>
   );
 }

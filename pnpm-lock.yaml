@@ -1015,6 +1015,10 @@ importers:
         version: 3.25.76
 
   artifacts/equipe:
+    dependencies:
+      '@simplewebauthn/browser':
+        specifier: ^13.3.0
+        version: 13.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -1587,6 +1591,10 @@ importers:
         version: 3.25.76
 
   artifacts/gestor-mobile:
+    dependencies:
+      '@simplewebauthn/browser':
+        specifier: ^13.3.0
+        version: 13.3.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0

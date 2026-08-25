@@ -20,6 +20,7 @@ import { Eye, EyeOff, Loader2, Utensils } from 'lucide-react';
 import { FloatingChat } from '@/components/FloatingChat';
 import { IdiomaProvider, useTranslation } from './i18n/IdiomaContext';
 import { ConfigFlutuante } from './i18n/ConfigFlutuante';
+import { EmployeePasskeyPrompt } from './components/EmployeePasskeyPrompt';
 
 const queryClient = new QueryClient();
 
@@ -208,6 +209,7 @@ function App() {
     if (raw) { try { return JSON.parse(raw); } catch { /* corrompida */ } }
     return null; // exige login por PIN
   });
+  const [showPasskey, setShowPasskey] = useState(false);
 
   // Renova o token automaticamente a cada 90 minutos (token dura 2h).
   useEffect(() => {
@@ -240,8 +242,9 @@ function App() {
       <QueryClientProvider client={queryClient}>
         {session
           ? <InterfaceRouter session={session} onSair={sair} />
-          : <PinLogin onLogin={setSession} />
+          : <PinLogin onLogin={(nextSession) => { setSession(nextSession); if (!localStorage.getItem('miar-equipe-passkey-prompted')) setShowPasskey(true); }} />
         }
+        {showPasskey && session && <EmployeePasskeyPrompt token={session.token} onDone={() => { localStorage.setItem('miar-equipe-passkey-prompted', '1'); setShowPasskey(false); }} />}
         <ConfigFlutuante />
       </QueryClientProvider>
     </IdiomaProvider>
