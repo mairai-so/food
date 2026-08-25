@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+: "${BACKUP_FILE:?Defina BACKUP_FILE com o caminho de um backup .sql.gz}"
+: "${TARGET_DATABASE_URL:?Defina TARGET_DATABASE_URL para a base de destino}"
+
+if [[ ! -f "$BACKUP_FILE" ]]; then
+  echo "Backup não encontrado: $BACKUP_FILE" >&2
+  exit 1
+fi
+
+if [[ "${CONFIRM_RESTORE:-}" != "YES_RESTORE_MIA_DATABASE" ]]; then
+  echo "Para restaurar, defina CONFIRM_RESTORE=YES_RESTORE_MIA_DATABASE." >&2
+  echo "Use primeiro uma base de homologação. Não sobrescreva produção sem backup e autorização." >&2
+  exit 2
+fi
+
+gzip -dc "$BACKUP_FILE" | psql --set= ON_ERROR_STOP=1 "$TARGET_DATABASE_URL"
+printf 'Restauração concluída em: %s\n' "$TARGET_DATABASE_URL"

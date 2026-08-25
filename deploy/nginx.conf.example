@@ -1,0 +1,33 @@
+# MIAR AI/FOOD — modelo de proxy
+# Substituir os caminhos /srv/miar-ai-food/* pelos diretórios dos builds.
+# O TLS deve ser configurado pelo Certbot ou pelo proxy escolhido no servidor.
+
+server {
+    listen 80;
+    server_name exemplo.miar.ai;
+
+    client_max_body_size 20m;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /gestor/ {
+        alias /srv/miar-ai-food/gestor/;
+        try_files $uri $uri/ /gestor/index.html;
+    }
+
+    location /cliente/ {
+        alias /srv/miar-ai-food/cliente/;
+        try_files $uri $uri/ /cliente/index.html;
+    }
+
+    location / {
+        return 302 /cliente/;
+    }
+}

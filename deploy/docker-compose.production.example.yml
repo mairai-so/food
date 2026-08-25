@@ -1,0 +1,51 @@
+# MIAR AI/FOOD — exemplo de produção
+# Copiar para docker-compose.production.yml no servidor e preencher o arquivo
+# de ambiente fora do repositório. Nunca commitar valores reais.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no ambiente}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no ambiente}
+      POSTGRES_DB: ${POSTGRES_DB:-miar}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - miar_internal
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-miar}
+    expose:
+      - "8080"
+    networks:
+      - miar_internal
+      - miar_web
+
+  # O proxy HTTPS deve ser adicionado na etapa de domínio e TLS.
+  # O PostgreSQL não tem ports: e não é publicado na internet.
+
+volumes:
+  postgres_data:
+
+networks:
+  miar_internal:
+    internal: true
+  miar_web:
