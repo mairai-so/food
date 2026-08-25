@@ -1,0 +1,88 @@
+export type Idioma = "pt" | "es" | "gn" | "en";
+
+export const IDIOMA_LABEL: Record<Idioma, string> = {
+  pt: "Português",
+  es: "Español",
+  gn: "Guarani",
+  en: "English",
+};
+
+export const IDIOMA_BANDEIRA: Record<Idioma, string> = {
+  pt: "🇧🇷",
+  es: "🇪🇸",
+  gn: "🇵🇾",
+  en: "🇺🇸",
+};
+
+type Dicionario = Record<string, string>;
+
+export const TRADUCOES: Record<Idioma, Dicionario> = {
+  pt: {
+    "app.title": "Miar Gestor",
+    "app.subtitle": "Sua operação no bolso.",
+    "auth.email.label": "E-mail",
+    "auth.password.label": "Senha",
+    "auth.button.access": "Acessar Painel",
+    "auth.button.entering": "Entrando...",
+    "auth.error.login": "Erro ao entrar",
+    "auth.error.default": "Verifique suas credenciais",
+    "nav.painel": "Painel",
+    "nav.sair": "Sair",
+    "config.titulo": "Configurações",
+    "config.idioma_titulo": "Idioma",
+    "config.idioma_texto": "Escolha o idioma deste app. Sua escolha é pessoal e não altera a dos outros.",
+    "idioma.escolher": "Escolher idioma",
+    "idioma.padrao": "Idioma padrão",
+  },
+  es: {
+    "app.title": "Administrador de Miar",
+    "app.subtitle": "Tu operación en la palma.",
+    "auth.email.label": "Correo electrónico",
+    "auth.password.label": "Contraseña",
+    "auth.button.access": "Acceder al panel",
+    "auth.button.entering": "Ingresando...",
+    "auth.error.login": "Error al entrar",
+    "auth.error.default": "Revisa tus credenciales",
+    "nav.painel": "Panel",
+    "nav.sair": "Salir",
+    "config.titulo": "Configuración",
+    "config.idioma_titulo": "Lenguaje",
+    "config.idioma_texto": "Elegí el idioma de esta app. Tu elección es personal y no modifica la de los demás.",
+    "idioma.escolher": "Elegir idioma",
+    "idioma.padrao": "Idioma predeterminado",
+  },
+  gn: {
+    "app.title": "Miar Moakãhára",
+    "app.subtitle": "Nde mba'eva ko ñandutípe.",
+    "auth.email.label": "Ñanduti veve",
+    "auth.password.label": "Ñe'ẽñemi",
+    "auth.button.access": "Eike rogaguata-pe",
+    "auth.button.entering": "Ojeike...",
+    "auth.error.login": "Jejavy jeike",
+    "auth.error.default": "Ehecháva nde mba'ete",
+    "nav.painel": "Rogaguata",
+    "nav.sair": "Esẽ",
+    "config.titulo": "Ñemboheko",
+    "config.idioma_titulo": "Ñe'ẽ",
+    "config.idioma_texto": "Eiporavo ko app-pe g̃uarã ñe'ẽ. Nde rehegua ha ndaijáiva ambuekuéra.",
+    "idioma.escolher": "Eiporavo ñe'ẽ",
+    "idioma.padrao": "Ñe'ẽ reko",
+  },
+  en: {
+    "app.title": "Miar Manager",
+    "app.subtitle": "Your operation in your pocket.",
+    "auth.email.label": "Email",
+    "auth.password.label": "Password",
+    "auth.button.access": "Access dashboard",
+    "auth.button.entering": "Signing in...",
+    "auth.error.login": "Error signing in",
+    "auth.error.default": "Check your credentials",
+    "nav.painel": "Dashboard",
+    "nav.sair": "Sign out",
+    "config.titulo": "Settings",
+    "config.idioma_titulo": "Language",
+    "config.idioma_texto": "Choose this app language. Your choice is personal and does not change other users' settings.",
+    "idioma.escolher": "Choose language",
+    "idioma.padrao": "Default language",
+  },
+};
