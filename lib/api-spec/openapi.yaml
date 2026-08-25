@@ -1,0 +1,2922 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: MIAR Gestor API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: auth
+  - name: dashboard
+  - name: orders
+  - name: tables
+  - name: menu
+  - name: stock
+  - name: cashier
+  - name: delivery
+  - name: employees
+  - name: customers
+  - name: analytics
+  - name: marketing
+  - name: ai
+  - name: nutrition
+  - name: audit
+  - name: settings
+  - name: backup
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── AUTH ──────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Owner/manager login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+
+  # ── DASHBOARD ─────────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Main dashboard KPIs and summary
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Recent activity feed
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Activity list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/alerts:
+    get:
+      operationId: getDashboardAlerts
+      tags: [dashboard]
+      summary: Active alerts (low stock, expiry, waiter calls, etc.)
+      responses:
+        "200":
+          description: Alerts list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+
+  # ── ORDERS ────────────────────────────────────────────────────────────
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, preparing, ready, delivered, cancelled]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [dine_in, delivery, takeout]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update order status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/kitchen:
+    get:
+      operationId: getKitchenOrders
+      tags: [orders]
+      summary: Kitchen view — pending and preparing orders
+      responses:
+        "200":
+          description: Kitchen orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KitchenView"
+
+  # ── TABLES ────────────────────────────────────────────────────────────
+  /tables:
+    get:
+      operationId: listTables
+      tags: [tables]
+      summary: List all tables with status
+      responses:
+        "200":
+          description: Tables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Table"
+    post:
+      operationId: createTable
+      tags: [tables]
+      summary: Create table
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Table"
+
+  /tables/{id}:
+    patch:
+      operationId: updateTable
+      tags: [tables]
+      summary: Update table status or info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableUpdate"
+      responses:
+        "200":
+          description: Updated table
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Table"
+
+  /tables/{id}/session:
+    get:
+      operationId: getTableSession
+      tags: [tables]
+      summary: Get active session for a table
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Table session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TableSession"
+
+  /tables/map:
+    get:
+      operationId: getTablesMap
+      tags: [tables]
+      summary: Table map with occupancy stats
+      responses:
+        "200":
+          description: Table map summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TablesMap"
+
+  /waiter-calls:
+    get:
+      operationId: listWaiterCalls
+      tags: [tables]
+      summary: List active waiter calls
+      responses:
+        "200":
+          description: Waiter calls
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WaiterCall"
+
+  /waiter-calls/{id}/claim:
+    post:
+      operationId: claimWaiterCall
+      tags: [tables]
+      summary: Claim/resolve a waiter call
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Claimed
+
+  # ── MENU ──────────────────────────────────────────────────────────────
+  /menu/categories:
+    get:
+      operationId: listCategories
+      tags: [menu]
+      summary: List menu categories
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [menu]
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /menu/categories/{id}:
+    patch:
+      operationId: updateCategory
+      tags: [menu]
+      summary: Update category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [menu]
+      summary: Delete category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /menu/items:
+    get:
+      operationId: listMenuItems
+      tags: [menu]
+      summary: List menu items
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: available
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItem"
+    post:
+      operationId: createMenuItem
+      tags: [menu]
+      summary: Create menu item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+
+  /menu/items/{id}:
+    patch:
+      operationId: updateMenuItem
+      tags: [menu]
+      summary: Update menu item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+    delete:
+      operationId: deleteMenuItem
+      tags: [menu]
+      summary: Delete menu item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /menu/top-sellers:
+    get:
+      operationId: getTopSellers
+      tags: [menu]
+      summary: Top selling menu items
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top sellers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopSellerItem"
+
+  # ── STOCK ─────────────────────────────────────────────────────────────
+  /stock:
+    get:
+      operationId: listStock
+      tags: [stock]
+      summary: List stock items
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: lowStock
+          in: query
+          schema:
+            type: boolean
+        - name: nearExpiry
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Stock items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockItem"
+    post:
+      operationId: createStockItem
+      tags: [stock]
+      summary: Create stock item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockItem"
+
+  /stock/{id}:
+    patch:
+      operationId: updateStockItem
+      tags: [stock]
+      summary: Update stock item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockItemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockItem"
+    delete:
+      operationId: deleteStockItem
+      tags: [stock]
+      summary: Delete stock item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /stock/summary:
+    get:
+      operationId: getStockSummary
+      tags: [stock]
+      summary: Stock summary — low stock count, near expiry count, total value
+      responses:
+        "200":
+          description: Stock summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockSummary"
+
+  /stock/movements:
+    get:
+      operationId: listStockMovements
+      tags: [stock]
+      summary: Stock movement history
+      parameters:
+        - name: itemId
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Movements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockMovement"
+    post:
+      operationId: createStockMovement
+      tags: [stock]
+      summary: Record stock movement (entry or exit)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockMovementInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockMovement"
+
+  # ── CASHIER ───────────────────────────────────────────────────────────
+  /cashier/session/current:
+    get:
+      operationId: getCurrentCashierSession
+      tags: [cashier]
+      summary: Get current open cashier session
+      responses:
+        "200":
+          description: Current session or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashierSession"
+
+  /cashier/session/open:
+    post:
+      operationId: openCashierSession
+      tags: [cashier]
+      summary: Open cashier session (start of shift)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CashierSessionOpen"
+      responses:
+        "201":
+          description: Session opened
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashierSession"
+
+  /cashier/session/{id}/close:
+    post:
+      operationId: closeCashierSession
+      tags: [cashier]
+      summary: Close cashier session (end of shift)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CashierSessionClose"
+      responses:
+        "200":
+          description: Session closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashierSession"
+
+  /cashier/session/{id}/movement:
+    post:
+      operationId: addCashierMovement
+      tags: [cashier]
+      summary: Add cashier movement (sangria, reforço, sale)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CashierMovementInput"
+      responses:
+        "200":
+          description: Movement added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashierSession"
+
+  /cashier/sessions:
+    get:
+      operationId: listCashierSessions
+      tags: [cashier]
+      summary: List cashier sessions history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Sessions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CashierSession"
+
+  /cashier/report:
+    get:
+      operationId: getCashierReport
+      tags: [cashier]
+      summary: Financial report for a date range
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashierReport"
+
+  # ── DELIVERY ──────────────────────────────────────────────────────────
+  /deliveries:
+    get:
+      operationId: listDeliveries
+      tags: [delivery]
+      summary: List delivery orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, preparing, ready, awaiting_courier, in_transit, delivered, cancelled]
+      responses:
+        "200":
+          description: Deliveries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Delivery"
+
+  /deliveries/{id}:
+    get:
+      operationId: getDelivery
+      tags: [delivery]
+      summary: Get delivery details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Delivery
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delivery"
+    patch:
+      operationId: updateDeliveryStatus
+      tags: [delivery]
+      summary: Update delivery status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delivery"
+
+  /deliveries/{id}/incident:
+    post:
+      operationId: createDeliveryIncident
+      tags: [delivery]
+      summary: Register delivery incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryIncidentInput"
+      responses:
+        "201":
+          description: Incident created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryIncident"
+
+  /delivery/couriers:
+    get:
+      operationId: listCouriers
+      tags: [delivery]
+      summary: List couriers with governance status
+      responses:
+        "200":
+          description: Couriers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Courier"
+
+  /delivery/couriers/{id}/governance:
+    get:
+      operationId: getCourierGovernance
+      tags: [delivery]
+      summary: Get courier governance history (incidents, warnings, suspensions)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Governance record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierGovernance"
+
+  # ── EMPLOYEES ─────────────────────────────────────────────────────────
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      summary: List employees
+      responses:
+        "200":
+          description: Employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+    post:
+      operationId: createEmployee
+      tags: [employees]
+      summary: Create employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+
+  /employees/{id}:
+    patch:
+      operationId: updateEmployee
+      tags: [employees]
+      summary: Update employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+    delete:
+      operationId: deleteEmployee
+      tags: [employees]
+      summary: Delete employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /employees/{id}/token:
+    post:
+      operationId: regenerateEmployeeToken
+      tags: [employees]
+      summary: Regenerate employee access token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: New token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeToken"
+
+  # ── CUSTOMERS ─────────────────────────────────────────────────────────
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List customers
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [customers]
+      summary: Get customer profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /feedback:
+    get:
+      operationId: listFeedback
+      tags: [customers]
+      summary: List customer feedback
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [feedback, complaint]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, resolved]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Feedback list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feedback"
+
+  /feedback/{id}/respond:
+    post:
+      operationId: respondToFeedback
+      tags: [customers]
+      summary: Respond to feedback or complaint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackResponse"
+      responses:
+        "200":
+          description: Responded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+
+  # ── ANALYTICS ─────────────────────────────────────────────────────────
+  /analytics/sales:
+    get:
+      operationId: getSalesAnalytics
+      tags: [analytics]
+      summary: Sales analytics by period
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, year]
+            default: week
+      responses:
+        "200":
+          description: Sales analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SalesAnalytics"
+
+  /analytics/products:
+    get:
+      operationId: getProductsAnalytics
+      tags: [analytics]
+      summary: Products performance analytics
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, year]
+            default: month
+      responses:
+        "200":
+          description: Products analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductsAnalytics"
+
+  /analytics/hours:
+    get:
+      operationId: getHoursAnalytics
+      tags: [analytics]
+      summary: Sales by hour of day
+      responses:
+        "200":
+          description: Hours data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HourData"
+
+  /analytics/overview:
+    get:
+      operationId: getAnalyticsOverview
+      tags: [analytics]
+      summary: Full analytics overview (revenue, orders, ticket, trends)
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, year]
+            default: month
+      responses:
+        "200":
+          description: Overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsOverview"
+
+  # ── MARKETING ─────────────────────────────────────────────────────────
+  /marketing/campaigns:
+    get:
+      operationId: listCampaigns
+      tags: [marketing]
+      summary: List marketing campaigns
+      responses:
+        "200":
+          description: Campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Campaign"
+    post:
+      operationId: createCampaign
+      tags: [marketing]
+      summary: Generate AI marketing campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignInput"
+      responses:
+        "201":
+          description: Campaign generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /marketing/campaigns/{id}:
+    delete:
+      operationId: deleteCampaign
+      tags: [marketing]
+      summary: Delete campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── AI ASSISTANT ──────────────────────────────────────────────────────
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      summary: AI assistant chat for business analysis and recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiChatInput"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiReply"
+
+  /ai/chat/history:
+    get:
+      operationId: getAiChatHistory
+      tags: [ai]
+      summary: Get AI chat history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiChatMessage"
+
+  /ai/insights:
+    get:
+      operationId: getAiInsights
+      tags: [ai]
+      summary: AI-generated business insights and recommendations
+      responses:
+        "200":
+          description: Insights
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiInsights"
+
+  # ── NUTRITION ─────────────────────────────────────────────────────────
+  /nutrition/profile:
+    get:
+      operationId: getNutritionProfile
+      tags: [nutrition]
+      summary: Get nutrition profile (customer-facing for this restaurant)
+      responses:
+        "200":
+          description: Nutrition profile config
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutritionProfile"
+    put:
+      operationId: updateNutritionProfile
+      tags: [nutrition]
+      summary: Update nutrition profile settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NutritionProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutritionProfile"
+
+  /nutrition/analyze:
+    post:
+      operationId: analyzeFood
+      tags: [nutrition]
+      summary: Analyze food/dish nutritional info via AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodAnalysisInput"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodAnalysisResult"
+
+  /nutrition/chat:
+    post:
+      operationId: nutritionChat
+      tags: [nutrition]
+      summary: Nutritional AI chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NutritionChatInput"
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutritionAdvice"
+
+  /nutrition/history:
+    get:
+      operationId: getNutritionHistory
+      tags: [nutrition]
+      summary: Nutritional analysis history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: History
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NutritionRecord"
+
+  # ── AUDIT ─────────────────────────────────────────────────────────────
+  /audit:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit logs
+      parameters:
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: userId
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+
+  # ── SETTINGS ──────────────────────────────────────────────────────────
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get restaurant settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantSettings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update restaurant settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RestaurantSettingsUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantSettings"
+
+  # ── BACKUP ────────────────────────────────────────────────────────────
+  /backup/export:
+    post:
+      operationId: exportBackup
+      tags: [backup]
+      summary: Create data backup
+      responses:
+        "200":
+          description: Backup URL/data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BackupResult"
+
+  /backup/list:
+    get:
+      operationId: listBackups
+      tags: [backup]
+      summary: List available backups
+      responses:
+        "200":
+          description: Backups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BackupEntry"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    # ── AUTH ──────────────────────────────────────────────────────────
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResult:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/AuthUser"
+
+    AuthUser:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [owner, manager]
+        restaurantName:
+          type: ["string", "null"]
+
+    # ── DASHBOARD ────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [revenue, ordersToday, tablesOccupied, tablesFree, activeDeliveries, lowStockItems, waiterCalls, avgTicket]
+      properties:
+        revenue:
+          type: number
+        revenueChange:
+          type: number
+        ordersToday:
+          type: integer
+        ordersChange:
+          type: number
+        tablesOccupied:
+          type: integer
+        tablesFree:
+          type: integer
+        activeDeliveries:
+          type: integer
+        lowStockItems:
+          type: integer
+        nearExpiryItems:
+          type: integer
+        waiterCalls:
+          type: integer
+        avgTicket:
+          type: number
+        kitchenPending:
+          type: integer
+        kitchenPreparing:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, timestamp]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: ["object", "null"]
+          additionalProperties: true
+
+    Alert:
+      type: object
+      required: [id, type, severity, message, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [low_stock, near_expiry, waiter_call, kitchen_delay, delivery_issue]
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        message:
+          type: string
+        itemId:
+          type: ["integer", "null"]
+        resolved:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── ORDERS ───────────────────────────────────────────────────────
+    Order:
+      type: object
+      required: [id, type, status, items, total, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [dine_in, delivery, takeout]
+        status:
+          type: string
+          enum: [pending, preparing, ready, delivered, cancelled]
+        tableId:
+          type: ["integer", "null"]
+        tableNumber:
+          type: ["string", "null"]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        total:
+          type: number
+        notes:
+          type: ["string", "null"]
+        estimatedMinutes:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        nearExpiryWarning:
+          type: ["string", "null"]
+
+    OrderItem:
+      type: object
+      required: [menuItemId, name, quantity, price]
+      properties:
+        menuItemId:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+        notes:
+          type: ["string", "null"]
+
+    OrderInput:
+      type: object
+      required: [type, items]
+      properties:
+        type:
+          type: string
+          enum: [dine_in, delivery, takeout]
+        tableId:
+          type: ["integer", "null"]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        notes:
+          type: ["string", "null"]
+
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [pending, preparing, ready, delivered, cancelled]
+        estimatedMinutes:
+          type: ["integer", "null"]
+
+    KitchenView:
+      type: object
+      required: [pending, preparing, ready, delayed]
+      properties:
+        pending:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        preparing:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        ready:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        delayed:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        stats:
+          $ref: "#/components/schemas/KitchenStats"
+
+    KitchenStats:
+      type: object
+      required: [avgPrepTimeMinutes, ordersCompletedToday, delayedCount]
+      properties:
+        avgPrepTimeMinutes:
+          type: number
+        ordersCompletedToday:
+          type: integer
+        delayedCount:
+          type: integer
+
+    # ── TABLES ───────────────────────────────────────────────────────
+    Table:
+      type: object
+      required: [id, number, seats, status, qrToken]
+      properties:
+        id:
+          type: integer
+        number:
+          type: string
+        seats:
+          type: integer
+        status:
+          type: string
+          enum: [free, occupied, reserved, cleaning, paid]
+        qrToken:
+          type: string
+        currentSession:
+          $ref: "#/components/schemas/TableSession"
+
+    TableInput:
+      type: object
+      required: [number, seats]
+      properties:
+        number:
+          type: string
+        seats:
+          type: integer
+
+    TableUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [free, occupied, reserved, cleaning, paid]
+        seats:
+          type: integer
+
+    TableSession:
+      type: object
+      required: [id, tableId, guestCount, items, total, splitMode, openedAt]
+      properties:
+        id:
+          type: integer
+        tableId:
+          type: integer
+        guestCount:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        total:
+          type: number
+        splitMode:
+          type: string
+          enum: [equal, by_items, custom]
+        payments:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        openedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    TablesMap:
+      type: object
+      required: [tables, stats]
+      properties:
+        tables:
+          type: array
+          items:
+            $ref: "#/components/schemas/Table"
+        stats:
+          type: object
+          required: [total, free, occupied, reserved, cleaning]
+          properties:
+            total:
+              type: integer
+            free:
+              type: integer
+            occupied:
+              type: integer
+            reserved:
+              type: integer
+            cleaning:
+              type: integer
+
+    WaiterCall:
+      type: object
+      required: [id, tableId, tableNumber, status, createdAt]
+      properties:
+        id:
+          type: integer
+        tableId:
+          type: integer
+        tableNumber:
+          type: string
+        status:
+          type: string
+          enum: [pending, claimed]
+        claimedBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── MENU ─────────────────────────────────────────────────────────
+    Category:
+      type: object
+      required: [id, name, sortOrder, active]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        active:
+          type: boolean
+
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        sortOrder:
+          type: integer
+
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        sortOrder:
+          type: integer
+        active:
+          type: boolean
+
+    MenuItem:
+      type: object
+      required: [id, categoryId, name, price, available]
+      properties:
+        id:
+          type: integer
+        categoryId:
+          type: integer
+        categoryName:
+          type: ["string", "null"]
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: number
+        imageUrl:
+          type: ["string", "null"]
+        available:
+          type: boolean
+        prepTimeMinutes:
+          type: ["integer", "null"]
+        calories:
+          type: ["integer", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+
+    MenuItemInput:
+      type: object
+      required: [categoryId, name, price]
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        imageUrl:
+          type: string
+        available:
+          type: boolean
+        prepTimeMinutes:
+          type: integer
+        calories:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    MenuItemUpdate:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        imageUrl:
+          type: string
+        available:
+          type: boolean
+        prepTimeMinutes:
+          type: integer
+        calories:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    TopSellerItem:
+      type: object
+      required: [menuItemId, name, soldCount, revenue]
+      properties:
+        menuItemId:
+          type: integer
+        name:
+          type: string
+        soldCount:
+          type: integer
+        revenue:
+          type: number
+
+    # ── STOCK ────────────────────────────────────────────────────────
+    StockItem:
+      type: object
+      required: [id, name, quantity, unit, minQuantity, category]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        minQuantity:
+          type: number
+        category:
+          type: string
+        expiryDate:
+          type: ["string", "null"]
+          format: date
+        supplier:
+          type: ["string", "null"]
+        costPerUnit:
+          type: ["number", "null"]
+        isLowStock:
+          type: boolean
+        isNearExpiry:
+          type: boolean
+        daysUntilExpiry:
+          type: ["integer", "null"]
+
+    StockItemInput:
+      type: object
+      required: [name, quantity, unit, minQuantity, category]
+      properties:
+        name:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        minQuantity:
+          type: number
+        category:
+          type: string
+        expiryDate:
+          type: string
+          format: date
+        supplier:
+          type: string
+        costPerUnit:
+          type: number
+
+    StockItemUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        minQuantity:
+          type: number
+        category:
+          type: string
+        expiryDate:
+          type: string
+          format: date
+        supplier:
+          type: string
+        costPerUnit:
+          type: number
+
+    StockSummary:
+      type: object
+      required: [totalItems, lowStockCount, nearExpiryCount, totalValue]
+      properties:
+        totalItems:
+          type: integer
+        lowStockCount:
+          type: integer
+        nearExpiryCount:
+          type: integer
+        totalValue:
+          type: number
+        categories:
+          type: array
+          items:
+            type: object
+            required: [name, count]
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+
+    StockMovement:
+      type: object
+      required: [id, stockItemId, itemName, type, quantity, reason, createdAt]
+      properties:
+        id:
+          type: integer
+        stockItemId:
+          type: integer
+        itemName:
+          type: string
+        type:
+          type: string
+          enum: [entry, exit, adjustment, waste]
+        quantity:
+          type: number
+        reason:
+          type: string
+        createdBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    StockMovementInput:
+      type: object
+      required: [stockItemId, type, quantity, reason]
+      properties:
+        stockItemId:
+          type: integer
+        type:
+          type: string
+          enum: [entry, exit, adjustment, waste]
+        quantity:
+          type: number
+        reason:
+          type: string
+
+    # ── CASHIER ──────────────────────────────────────────────────────
+    CashierSession:
+      type: object
+      required: [id, status, openedAt, openingBalance, totalSales, totalWithdrawals, totalDeposits]
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [open, closed]
+        openedBy:
+          type: string
+        closedBy:
+          type: ["string", "null"]
+        openedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: ["string", "null"]
+          format: date-time
+        openingBalance:
+          type: number
+        closingBalance:
+          type: ["number", "null"]
+        totalSales:
+          type: number
+        totalCash:
+          type: number
+        totalCard:
+          type: number
+        totalPix:
+          type: number
+        totalWithdrawals:
+          type: number
+        totalDeposits:
+          type: number
+        difference:
+          type: ["number", "null"]
+        movements:
+          type: array
+          items:
+            $ref: "#/components/schemas/CashierMovement"
+
+    CashierMovement:
+      type: object
+      required: [id, type, amount, description, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [sale, withdrawal, deposit, tip, couvert]
+        amount:
+          type: number
+        paymentMethod:
+          type: ["string", "null"]
+          enum: [cash, card, pix, mixed, null]
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CashierSessionOpen:
+      type: object
+      required: [openingBalance, openedBy]
+      properties:
+        openingBalance:
+          type: number
+        openedBy:
+          type: string
+
+    CashierSessionClose:
+      type: object
+      required: [closingBalance, closedBy]
+      properties:
+        closingBalance:
+          type: number
+        closedBy:
+          type: string
+        notes:
+          type: string
+
+    CashierMovementInput:
+      type: object
+      required: [type, amount, description]
+      properties:
+        type:
+          type: string
+          enum: [sale, withdrawal, deposit, tip, couvert]
+        amount:
+          type: number
+        paymentMethod:
+          type: string
+          enum: [cash, card, pix, mixed]
+        description:
+          type: string
+
+    CashierReport:
+      type: object
+      required: [period, totalRevenue, totalOrders, avgTicket, byPaymentMethod]
+      properties:
+        period:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+            to:
+              type: string
+        totalRevenue:
+          type: number
+        totalOrders:
+          type: integer
+        avgTicket:
+          type: number
+        byPaymentMethod:
+          type: object
+          additionalProperties:
+            type: number
+        dailyBreakdown:
+          type: array
+          items:
+            type: object
+            required: [date, revenue, orders]
+            properties:
+              date:
+                type: string
+              revenue:
+                type: number
+              orders:
+                type: integer
+
+    # ── DELIVERY ─────────────────────────────────────────────────────
+    Delivery:
+      type: object
+      required: [id, orderId, status, address, createdAt]
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        status:
+          type: string
+          enum: [pending, preparing, ready, awaiting_courier, in_transit, delivered, cancelled]
+        courierId:
+          type: ["integer", "null"]
+        courierName:
+          type: ["string", "null"]
+        address:
+          type: string
+        addressNotes:
+          type: ["string", "null"]
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        estimatedMinutes:
+          type: ["integer", "null"]
+        total:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: ["string", "null"]
+          format: date-time
+        incidents:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeliveryIncident"
+
+    DeliveryStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [pending, preparing, ready, awaiting_courier, in_transit, delivered, cancelled]
+        courierId:
+          type: ["integer", "null"]
+
+    DeliveryIncident:
+      type: object
+      required: [id, deliveryId, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        deliveryId:
+          type: integer
+        type:
+          type: string
+          enum: [wrong_address, customer_unavailable, damaged_package, courier_issue, customer_issue, other]
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    DeliveryIncidentInput:
+      type: object
+      required: [type, description]
+      properties:
+        type:
+          type: string
+          enum: [wrong_address, customer_unavailable, damaged_package, courier_issue, customer_issue, other]
+        description:
+          type: string
+
+    Courier:
+      type: object
+      required: [id, name, phone, status, governanceLevel]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [available, busy, offline]
+        governanceLevel:
+          type: string
+          enum: [clear, warning, suspended, banned]
+        completedDeliveries:
+          type: integer
+        rating:
+          type: ["number", "null"]
+
+    CourierGovernance:
+      type: object
+      required: [courierId, level, incidents, warnings]
+      properties:
+        courierId:
+          type: integer
+        level:
+          type: string
+          enum: [clear, warning, suspended, banned]
+        incidents:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeliveryIncident"
+        warnings:
+          type: integer
+        suspensions:
+          type: integer
+        suspendedUntil:
+          type: ["string", "null"]
+          format: date-time
+
+    # ── EMPLOYEES ────────────────────────────────────────────────────
+    Employee:
+      type: object
+      required: [id, name, role, active, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [manager, waiter, kitchen, cashier, delivery, custom]
+        roleLabel:
+          type: ["string", "null"]
+        active:
+          type: boolean
+        token:
+          type: ["string", "null"]
+        permissions:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    EmployeeInput:
+      type: object
+      required: [name, role]
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [manager, waiter, kitchen, cashier, delivery, custom]
+        roleLabel:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [manager, waiter, kitchen, cashier, delivery, custom]
+        roleLabel:
+          type: string
+        active:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            type: string
+
+    EmployeeToken:
+      type: object
+      required: [token, employeeId]
+      properties:
+        token:
+          type: string
+        employeeId:
+          type: integer
+
+    # ── CUSTOMERS ────────────────────────────────────────────────────
+    Customer:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        totalOrders:
+          type: integer
+        totalSpent:
+          type: number
+        lastVisit:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    Feedback:
+      type: object
+      required: [id, type, rating, message, status, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [feedback, complaint]
+        customerName:
+          type: ["string", "null"]
+        customerId:
+          type: ["integer", "null"]
+        rating:
+          type: ["integer", "null"]
+        message:
+          type: string
+        category:
+          type: ["string", "null"]
+          enum: [food, service, delivery, app, other, null]
+        status:
+          type: string
+          enum: [open, resolved]
+        response:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    FeedbackResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          type: string
+
+    # ── ANALYTICS ────────────────────────────────────────────────────
+    SalesAnalytics:
+      type: object
+      required: [period, revenue, orders, avgTicket, trend]
+      properties:
+        period:
+          type: string
+        revenue:
+          type: number
+        orders:
+          type: integer
+        avgTicket:
+          type: number
+        trend:
+          type: array
+          items:
+            type: object
+            required: [label, revenue, orders]
+            properties:
+              label:
+                type: string
+              revenue:
+                type: number
+              orders:
+                type: integer
+
+    ProductsAnalytics:
+      type: object
+      required: [topSellers, bottomSellers, categoryBreakdown]
+      properties:
+        topSellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopSellerItem"
+        bottomSellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopSellerItem"
+        categoryBreakdown:
+          type: array
+          items:
+            type: object
+            required: [category, revenue, count]
+            properties:
+              category:
+                type: string
+              revenue:
+                type: number
+              count:
+                type: integer
+
+    HourData:
+      type: object
+      required: [hour, orders, revenue]
+      properties:
+        hour:
+          type: integer
+        orders:
+          type: integer
+        revenue:
+          type: number
+
+    AnalyticsOverview:
+      type: object
+      required: [period, revenue, orders, avgTicket, revenueChange, ordersChange, salesTrend, topProducts]
+      properties:
+        period:
+          type: string
+        revenue:
+          type: number
+        orders:
+          type: integer
+        avgTicket:
+          type: number
+        revenueChange:
+          type: number
+        ordersChange:
+          type: number
+        salesTrend:
+          type: array
+          items:
+            type: object
+            required: [label, revenue]
+            properties:
+              label:
+                type: string
+              revenue:
+                type: number
+        topProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopSellerItem"
+        ordersByType:
+          type: object
+          additionalProperties:
+            type: integer
+
+    # ── MARKETING ────────────────────────────────────────────────────
+    Campaign:
+      type: object
+      required: [id, title, headline, copy, hashtags, cta, platforms, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        headline:
+          type: string
+        copy:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        cta:
+          type: string
+        platforms:
+          type: object
+          additionalProperties:
+            type: string
+        imageUrl:
+          type: ["string", "null"]
+        brief:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    CampaignInput:
+      type: object
+      required: [brief]
+      properties:
+        brief:
+          type: string
+        targetPlatforms:
+          type: array
+          items:
+            type: string
+            enum: [instagram, whatsapp, tiktok, facebook]
+        imageUrl:
+          type: string
+
+    # ── AI ───────────────────────────────────────────────────────────
+    AiChatInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        context:
+          type: string
+          enum: [general, sales, stock, kitchen, delivery, marketing]
+
+    AiReply:
+      type: object
+      required: [id, message, timestamp]
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        suggestions:
+          type: array
+          items:
+            type: string
+
+    AiChatMessage:
+      type: object
+      required: [id, role, content, timestamp]
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    AiInsights:
+      type: object
+      required: [generatedAt, insights]
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        insights:
+          type: array
+          items:
+            type: object
+            required: [category, insight, priority]
+            properties:
+              category:
+                type: string
+                enum: [sales, stock, kitchen, delivery, marketing, general]
+              insight:
+                type: string
+              priority:
+                type: string
+                enum: [low, medium, high]
+              action:
+                type: ["string", "null"]
+
+    # ── NUTRITION ────────────────────────────────────────────────────
+    NutritionProfile:
+      type: object
+      required: [id, enabledForCustomers, goals]
+      properties:
+        id:
+          type: integer
+        enabledForCustomers:
+          type: boolean
+        goals:
+          type: array
+          items:
+            type: string
+        healthConditionsSupported:
+          type: array
+          items:
+            type: string
+        allergensList:
+          type: array
+          items:
+            type: string
+        defaultDailyCalories:
+          type: ["integer", "null"]
+
+    NutritionProfileUpdate:
+      type: object
+      properties:
+        enabledForCustomers:
+          type: boolean
+        goals:
+          type: array
+          items:
+            type: string
+        healthConditionsSupported:
+          type: array
+          items:
+            type: string
+        allergensList:
+          type: array
+          items:
+            type: string
+        defaultDailyCalories:
+          type: integer
+
+    FoodAnalysisInput:
+      type: object
+      required: [dishName]
+      properties:
+        dishName:
+          type: string
+        ingredients:
+          type: array
+          items:
+            type: string
+        portionSize:
+          type: string
+        imageBase64:
+          type: string
+
+    FoodAnalysisResult:
+      type: object
+      required: [dishName, calories, protein, carbs, fat, confidence]
+      properties:
+        dishName:
+          type: string
+        calories:
+          type: integer
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+        fiber:
+          type: ["number", "null"]
+        sodium:
+          type: ["number", "null"]
+        confidence:
+          type: string
+          enum: [low, medium, high]
+        notes:
+          type: ["string", "null"]
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    NutritionChatInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        userGoals:
+          type: array
+          items:
+            type: string
+        userConditions:
+          type: array
+          items:
+            type: string
+
+    NutritionAdvice:
+      type: object
+      required: [message, disclaimer]
+      properties:
+        message:
+          type: string
+        disclaimer:
+          type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+
+    NutritionRecord:
+      type: object
+      required: [id, dishName, calories, analysisDate]
+      properties:
+        id:
+          type: integer
+        dishName:
+          type: string
+        calories:
+          type: integer
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+        analysisDate:
+          type: string
+          format: date-time
+        imageUrl:
+          type: ["string", "null"]
+
+    # ── AUDIT ────────────────────────────────────────────────────────
+    AuditLog:
+      type: object
+      required: [id, action, entityType, description, createdAt]
+      properties:
+        id:
+          type: integer
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: ["integer", "null"]
+        description:
+          type: string
+        userId:
+          type: ["integer", "null"]
+        userName:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        metadata:
+          type: ["object", "null"]
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── SETTINGS ─────────────────────────────────────────────────────
+    RestaurantSettings:
+      type: object
+      required: [id, name, segment]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        segment:
+          type: string
+          enum: [restaurant, bar, pizzeria, bakery, cafeteria, fastfood, other]
+        address:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        cnpj:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        pixKey:
+          type: ["string", "null"]
+        deliveryEnabled:
+          type: boolean
+        deliveryFee:
+          type: ["number", "null"]
+        minDeliveryOrder:
+          type: ["number", "null"]
+        openingHours:
+          type: ["object", "null"]
+          additionalProperties: true
+        aiProviders:
+          type: ["object", "null"]
+          additionalProperties: true
+
+    RestaurantSettingsUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        segment:
+          type: string
+          enum: [restaurant, bar, pizzeria, bakery, cafeteria, fastfood, other]
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        cnpj:
+          type: string
+        pixKey:
+          type: string
+        deliveryEnabled:
+          type: boolean
+        deliveryFee:
+          type: number
+        minDeliveryOrder:
+          type: number
+        openingHours:
+          type: object
+          additionalProperties: true
+
+    # ── BACKUP ───────────────────────────────────────────────────────
+    BackupResult:
+      type: object
+      required: [backupId, createdAt, size]
+      properties:
+        backupId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        size:
+          type: integer
+        downloadUrl:
+          type: ["string", "null"]
+
+    BackupEntry:
+      type: object
+      required: [backupId, createdAt, size]
+      properties:
+        backupId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        size:
+          type: integer
