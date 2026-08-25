@@ -1,0 +1,42 @@
+/* MIAR AI — tokens de tema dia / noite
+   Raiz do ecossistema: verde medicina. Aplica junto do index.css do app.
+   Noite = assinatura escura + neon. Dia = claro, verde medicina na moldura. */
+
+:root {
+  /* cores fixas do ecossistema (nao mudam com o tema) */
+  --miar-verde: #00A86B;        /* verde medicina — raiz MIAR AI */
+  --miar-verde-forte: #00875A;
+  --miar-ciano: #00E6F2;        /* marca / acao no FOOD */
+  --miar-magenta: #E70B5F;      /* apetite — sotaque do FOOD */
+  --miar-turquesa: #00E0A8;     /* estado liberado — reservado */
+  --miar-alerta: #FFB020;       /* pendencia */
+}
+
+/* NOITE — assinatura */
+html.dark {
+  --miar-base: #050F19;
+  --miar-surface: #0D161D;
+  --miar-line: #1E2A34;
+  --miar-text: #F5EEE6;
+  --miar-muted: #A99FB2;
+  --miar-brand: var(--miar-ciano);
+  --miar-action: var(--miar-verde);
+  color-scheme: dark;
+}
+
+/* DIA — claro, verde medicina na moldura */
+html.light {
+  --miar-base: #F4FBF7;
+  --miar-surface: #FFFFFF;
+  --miar-line: #DCEAE3;
+  --miar-text: #0E1B15;
+  --miar-muted: #5B6B63;
+  --miar-brand: var(--miar-verde);
+  --miar-action: var(--miar-verde);
+  color-scheme: light;
+}
+
+html.dark body, html.light body {
+  background: var(--miar-base);
+  color: var(--miar-text);
+}
