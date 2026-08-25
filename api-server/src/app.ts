@@ -11,6 +11,7 @@ import { registerClient } from "./lib/sse";
 import { saveAllStoreData, loadStoreData } from "./lib/data-store";
 import { execute } from "./lib/db";
 import { initializeRegistroProtegido } from "./routes/registro-protegido";
+import { initPasskeyTable } from "./routes/passkeys";
 
 const app: Express = express();
 
@@ -258,6 +259,7 @@ async function initializeDatabase(): Promise<void> {
   // tabela que ainda não existe durante o boot.
   await initAuthTables();
   await initClientTables();
+  await initPasskeyTable();
   await initFeedTables();
   await initializeRegistroProtegido();
 

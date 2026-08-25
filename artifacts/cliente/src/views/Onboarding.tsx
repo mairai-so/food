@@ -8,6 +8,7 @@ import { setUser, setOnboarded, setSetupDone, clearSetupDone, setClientToken, cl
 import { guiaPorVozAtiva, definirGuiaPorVoz, falar, falarSeAtivo } from '../lib/acessibilidade';
 import type { UserProfile } from '../types';
 import { randomUUID } from '../lib/uuid';
+import PasskeyPrompt from '../components/PasskeyPrompt';
 
 // ─── Tipos de etapa ───────────────────────────────────────────────────────────
 
@@ -126,6 +127,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [guiaVoz, setGuiaVoz] = useState(() => guiaPorVozAtiva());
+  const [passkeyToken, setPasskeyToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (step === 'welcome') {
@@ -163,7 +165,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   };
 
   // ── Salvar após auth com API ────────────────────────────────────────────────
-  const finishWithAuth = (token: string, user: { id: string; name: string; email: string; phone?: string | null; gender?: UserProfile['gender'] | null; shareDataWithRestaurants?: boolean; allowAIMemory?: boolean; onboardingCompleted?: boolean }, remember = true) => {
+  const finishWithAuth = (token: string, user: { id: string; name: string; email: string; phone?: string | null; gender?: UserProfile['gender'] | null; shareDataWithRestaurants?: boolean; allowAIMemory?: boolean; onboardingCompleted?: boolean }, remember = true, offerPasskey = false) => {
     setClientToken(token, remember);
     setUser(makeProfile({
       id: user.id,
@@ -178,7 +180,8 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
     setOnboarded();
     if (user.onboardingCompleted) setSetupDone();
     else clearSetupDone();
-    onDone();
+    if (offerPasskey) setPasskeyToken(token);
+    else onDone();
   };
 
   // ── Cadastro ────────────────────────────────────────────────────────────────
@@ -199,7 +202,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       });
       const data = await res.json() as { token?: string; user?: { id: string; name: string; email: string; phone: string; gender?: UserProfile['gender']; onboardingCompleted?: boolean }; error?: string };
       if (!res.ok) { setError(data.error ?? 'Erro ao criar conta'); return; }
-      finishWithAuth(data.token!, data.user!, rememberLogin);
+      finishWithAuth(data.token!, data.user!, rememberLogin, true);
     } catch {
       setError('Falha de conexão. Tente novamente.');
     } finally { setLoading(false); }
@@ -551,6 +554,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 
 
       </AnimatePresence>
+      {passkeyToken && <PasskeyPrompt token={passkeyToken} onDone={onDone} />}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { LojaSwitcher } from '@/components/LojaSwitcher';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { IdiomaProvider, useTranslation } from './i18n/IdiomaContext';
 import { ConfigFlutuante } from './i18n/ConfigFlutuante';
+import PasskeyPrompt from './components/PasskeyPrompt';
 import { IDIOMA_LABEL, IDIOMA_BANDEIRA, IDIOMAS_GLOBAIS, type Idioma } from './i18n/traducoes';
 import PosCadastro from '@/pages/pos-cadastro';
 import AtivacoesSuperAdmin from '@/pages/ativacoes-super-admin';
@@ -758,6 +759,9 @@ function Home() {
       if (typeof data.token !== 'string' || !data.token) {
         throw new Error('O cadastro foi confirmado, mas o servidor não enviou o acesso.');
       }
+      storeAuthToken(data.token, true);
+      window.localStorage.setItem('miar-passkey-pending-token', data.token);
+      window.dispatchEvent(new Event('miar-passkey-prompt'));
       setMode('login');
       setRegistrationStep('details');
       setRegistrationCode(['', '', '', '', '', '']);
@@ -2369,6 +2373,19 @@ function Router() {
 }
 
 function App() {
+  const [passkeyToken, setPasskeyToken] = useState<string | null>(() => window.localStorage.getItem('miar-passkey-pending-token'));
+
+  useEffect(() => {
+    const showPrompt = () => setPasskeyToken(window.localStorage.getItem('miar-passkey-pending-token'));
+    window.addEventListener('miar-passkey-prompt', showPrompt);
+    return () => window.removeEventListener('miar-passkey-prompt', showPrompt);
+  }, []);
+
+  const finishPasskeyPrompt = () => {
+    window.localStorage.removeItem('miar-passkey-pending-token');
+    setPasskeyToken(null);
+  };
+
   return (
     <IdiomaProvider>
       <QueryClientProvider client={queryClient}>
@@ -2381,6 +2398,7 @@ function App() {
           <FloatingChat getToken={() => getStoredToken() ?? ''} />
           <Toaster />
           <ConfigFlutuante />
+          {passkeyToken && <PasskeyPrompt token={passkeyToken} onDone={finishPasskeyPrompt} />}
         </TooltipProvider>
       </QueryClientProvider>
     </IdiomaProvider>
