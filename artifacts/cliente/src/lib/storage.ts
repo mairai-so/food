@@ -28,13 +28,23 @@ export const setActiveOrder = (o: ActiveOrder | null) => lsSet('miar_active', o)
 
 // ── Client auth token (JWT da API) ────────────────────────────────────────────
 export const getClientToken = (): string | null => {
-  try { return localStorage.getItem('miar_client_token'); } catch { return null; }
+  try {
+    return localStorage.getItem('miar_client_token') ?? sessionStorage.getItem('miar_client_token');
+  } catch { return null; }
 };
-export const setClientToken = (token: string) => {
-  try { localStorage.setItem('miar_client_token', token); } catch {}
+export const setClientToken = (token: string, remember = true) => {
+  try {
+    const storage = remember ? localStorage : sessionStorage;
+    const otherStorage = remember ? sessionStorage : localStorage;
+    otherStorage.removeItem('miar_client_token');
+    storage.setItem('miar_client_token', token);
+  } catch {}
 };
 export const clearClientToken = () => {
-  try { localStorage.removeItem('miar_client_token'); } catch {}
+  try {
+    localStorage.removeItem('miar_client_token');
+    sessionStorage.removeItem('miar_client_token');
+  } catch {}
 };
 
 export const getSavedAddresses = (): SavedAddress[] => lsGet<SavedAddress[]>('miar_saved_addresses', []);

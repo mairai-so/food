@@ -1,7 +1,7 @@
 // artifacts/gestor/src/pages/socios.tsx
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowLeft, UserPlus, ShieldCheck, Trash2, Crown, KeyRound } from 'lucide-react';
+import { ArrowLeft, UserPlus, ShieldCheck, Trash2, Crown, KeyRound, Eye, EyeOff } from 'lucide-react';
 
 function getToken() {
   return window.localStorage.getItem('miar-owner-token') ?? '';
@@ -35,6 +35,7 @@ export default function Socios() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
@@ -131,12 +132,16 @@ export default function Socios() {
             <label className="block">
               <span className="mb-1.5 block text-xs text-slate-500">Senha inicial</span>
               <input
-                type="text"
+                type={mostrarSenha ? 'text' : 'password'}
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 data-testid="input-socio-senha"
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm outline-none focus:border-violet-500"
+                autoComplete="new-password"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 pr-10 text-sm outline-none focus:border-violet-500"
               />
+              <button type="button" onClick={() => setMostrarSenha((current) => !current)} className="relative -mt-9 mr-3 mb-3 ml-auto flex text-slate-400" aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>
+                {mostrarSenha ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </label>
           </div>
 

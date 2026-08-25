@@ -144,6 +144,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   // Login
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPass, setLoginPass] = useState('');
+  const [rememberLogin, setRememberLogin] = useState(true);
 
   // WhatsApp OTP
   const [otpPhone, setOtpPhone] = useState('');
@@ -162,8 +163,8 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   };
 
   // ── Salvar após auth com API ────────────────────────────────────────────────
-  const finishWithAuth = (token: string, user: { id: string; name: string; email: string; phone?: string | null; gender?: UserProfile['gender'] | null; shareDataWithRestaurants?: boolean; allowAIMemory?: boolean; onboardingCompleted?: boolean }) => {
-    setClientToken(token);
+  const finishWithAuth = (token: string, user: { id: string; name: string; email: string; phone?: string | null; gender?: UserProfile['gender'] | null; shareDataWithRestaurants?: boolean; allowAIMemory?: boolean; onboardingCompleted?: boolean }, remember = true) => {
+    setClientToken(token, remember);
     setUser(makeProfile({
       id: user.id,
       name: user.name,
@@ -198,7 +199,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       });
       const data = await res.json() as { token?: string; user?: { id: string; name: string; email: string; phone: string; gender?: UserProfile['gender']; onboardingCompleted?: boolean }; error?: string };
       if (!res.ok) { setError(data.error ?? 'Erro ao criar conta'); return; }
-      finishWithAuth(data.token!, data.user!);
+      finishWithAuth(data.token!, data.user!, rememberLogin);
     } catch {
       setError('Falha de conexão. Tente novamente.');
     } finally { setLoading(false); }
@@ -444,6 +445,10 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
                 type="email" placeholder="seu@email.com" autoComplete="email" icon={Mail} />
               <PasswordField label="Senha" value={loginPass} onChange={setLoginPass}
                 autoComplete="current-password" />
+              <label className="flex items-center gap-2 text-sm text-stone-500">
+                <input type="checkbox" checked={rememberLogin} onChange={e => setRememberLogin(e.target.checked)} />
+                Lembrar acesso neste aparelho
+              </label>
             </div>
 
             {error && (
