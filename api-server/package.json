@@ -12,6 +12,7 @@
     "check:tenant": "bash ../../scripts/check-tenant-isolation.sh"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^13.3.2",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "bcryptjs": "^2.4.3",
