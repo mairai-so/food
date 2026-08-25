@@ -10,6 +10,7 @@ import Board from '@/pages/board';
 import Settings from '@/pages/settings';
 import { IdiomaProvider } from './i18n/IdiomaContext';
 import { Eye, EyeOff } from 'lucide-react';
+import { EmployeePasskeyPrompt } from './components/EmployeePasskeyPrompt';
 
 const queryClient = new QueryClient();
 const KITCHEN_TOKEN_KEY = 'miar-cozinha-token';
@@ -121,6 +122,7 @@ function Router() {
 function App() {
   const [token, setToken] = useState(() => window.localStorage.getItem(KITCHEN_TOKEN_KEY) ?? window.sessionStorage.getItem(KITCHEN_TOKEN_KEY) ?? '');
   const [name, setName] = useState(() => window.localStorage.getItem(KITCHEN_NAME_KEY) ?? window.sessionStorage.getItem(KITCHEN_NAME_KEY) ?? '');
+  const [showPasskey, setShowPasskey] = useState(false);
 
   useEffect(() => {
     setAuthTokenSetter((nextToken) => {
@@ -143,6 +145,7 @@ function App() {
     storage.setItem(KITCHEN_NAME_KEY, nextName);
     setToken(nextToken);
     setName(nextName);
+    if (!window.localStorage.getItem('miar-kitchen-passkey-prompted')) setShowPasskey(true);
   };
 
   const onLogout = () => {
@@ -150,6 +153,7 @@ function App() {
     window.localStorage.removeItem(KITCHEN_NAME_KEY);
     setToken('');
     setName('');
+    setShowPasskey(false);
     queryClient.clear();
   };
 
@@ -165,6 +169,7 @@ function App() {
             <PinLogin onLogin={onLogin} />
           )}
           {token && <div className="sr-only">Sessão activa: {name}</div>}
+          {showPasskey && token && <EmployeePasskeyPrompt token={token} onDone={() => { window.localStorage.setItem('miar-kitchen-passkey-prompted', '1'); setShowPasskey(false); }} />}
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>

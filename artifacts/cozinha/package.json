@@ -45,8 +45,8 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "@workspace/i18n": "workspace:*",
     "@workspace/api-client-react": "workspace:*",
+    "@workspace/i18n": "workspace:*",
     "@workspace/voice-ptt": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
@@ -72,5 +72,8 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0"
   }
 }

@@ -10,6 +10,7 @@ import { CashCheckCamera } from './components/new-modules';
 import { FloatingChat } from './components/FloatingChat';
 import { IdiomaProvider, useTranslation } from './i18n/IdiomaContext';
 import { ConfigFlutuante } from './i18n/ConfigFlutuante';
+import { EmployeePasskeyPrompt } from './components/EmployeePasskeyPrompt';
 
 const queryClient = new QueryClient();
 
@@ -133,14 +134,16 @@ function CaixaApp({ onSair }: { onSair: () => void }) {
 
 function App() {
   const [logado, setLogado] = useState(() => Boolean(localStorage.getItem('miar-caixa-token')));
+  const [showPasskey, setShowPasskey] = useState(false);
 
   return (
     <IdiomaProvider>
       <QueryClientProvider client={queryClient}>
         {logado ? (
-          <CaixaApp onSair={() => { limparSessao(); setLogado(false); }} />
+          <><CaixaApp onSair={() => { limparSessao(); setLogado(false); setShowPasskey(false); }} />
+            {showPasskey && <EmployeePasskeyPrompt token={getToken()} onDone={() => { localStorage.setItem('miar-caixa-passkey-prompted', '1'); setShowPasskey(false); }} />}</>
         ) : (
-          <PinLogin onLogin={() => setLogado(true)} />
+          <PinLogin onLogin={() => { setLogado(true); if (!localStorage.getItem('miar-caixa-passkey-prompted')) setShowPasskey(true); }} />
         )}
         <ConfigFlutuante />
         <Toaster />
