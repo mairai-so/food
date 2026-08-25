@@ -1,4 +1,4 @@
-// artifacts/api-server/src/lib/funcoes.ts — copia local da lista mestra (fonte: lib/api-spec/src/funcoes.ts)
+// api-server/src/lib/funcoes.ts — copia local da lista mestra (fonte: lib/api-spec/src/funcoes.ts)
 //
 // LISTA MESTRA DE FUNÇÕES — fonte única de verdade.
 // A tela de usuários, cada app da casa e o porteiro do backend leem daqui.

@@ -93,7 +93,7 @@ try {
 // 3. Extrair tabelas criadas no boot da API
 console.log('\n3️⃣  Lendo SQL de boot da API...');
 try {
-  const bootFiles = execSync('find artifacts/api-server/src/lib -name "*.ts" | grep -v test').toString().split('\n').filter(Boolean);
+  const bootFiles = execSync('find api-server/src/lib -name "*.ts" | grep -v test').toString().split('\n').filter(Boolean);
   const bootTables = new Set<string>();
 
   bootFiles.forEach(file => {

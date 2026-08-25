@@ -6,14 +6,14 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY artifacts/api-server/package.json artifacts/api-server/package.json
+COPY api-server/package.json api-server/package.json
 COPY lib/api-client-react/package.json lib/api-client-react/package.json
 COPY lib/api-zod/package.json lib/api-zod/package.json
 COPY lib/db/package.json lib/db/package.json
 
 RUN pnpm install --frozen-lockfile
 
-COPY artifacts/api-server artifacts/api-server
+COPY api-server api-server
 COPY lib lib
 COPY scripts scripts
 
@@ -26,9 +26,9 @@ RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/artifacts/api-server/package.json ./artifacts/api-server/package.json
-COPY --from=build /app/artifacts/api-server/dist ./artifacts/api-server/dist
+COPY --from=build /app/api-server/package.json ./api-server/package.json
+COPY --from=build /app/api-server/dist ./api-server/dist
 COPY --from=build /app/lib ./lib
 
 EXPOSE 8080
-CMD ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
+CMD ["node", "--enable-source-maps", "api-server/dist/index.mjs"]

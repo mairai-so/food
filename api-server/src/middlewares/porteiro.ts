@@ -1,4 +1,4 @@
-// artifacts/api-server/src/middlewares/porteiro.ts
+// api-server/src/middlewares/porteiro.ts
 //
 // O PORTEIRO. Confere, em cada ação protegida, se quem chamou tem a função
 // ligada. Quem tem a CHAVE MESTRA (owner/manager) passa por qualquer porta.

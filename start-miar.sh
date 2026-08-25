@@ -12,7 +12,7 @@ done
 
 echo "Subindo API (porta 5000)..."
 (
-  cd "$(dirname "$0")/artifacts/api-server"
+  cd "$(dirname "$0")/api-server"
   export $(grep -v '^#' .env | xargs)
   pnpm run dev > /tmp/api-server.log 2>&1
 ) &

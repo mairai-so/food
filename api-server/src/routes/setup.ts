@@ -1,4 +1,4 @@
-// artifacts/api-server/src/routes/setup.ts
+// api-server/src/routes/setup.ts
 import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";

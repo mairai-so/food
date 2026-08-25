@@ -10,7 +10,7 @@ Atualmente, o projeto tem três "fontes" de verdade para o schema:
 
 1. **Drizzle ORM** (`lib/db/schema.ts`): Schema declarativo, type-safe, com migrações automáticas.
 2. **SQL estático** (`database/schema.sql`): Script SQL puro, versionado, fácil de revisar.
-3. **SQL de boot** (`artifacts/api-server/src/lib/`): Tabelas criadas dinamicamente no boot da API.
+3. **SQL de boot** (`api-server/src/lib/`): Tabelas criadas dinamicamente no boot da API.
 
 Isso cria:
 - Divergência silenciosa.

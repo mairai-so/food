@@ -83,7 +83,7 @@ Abra em terminais separados:
 
 ```bash
 # Terminal 1: API
-cd artifacts/api-server
+cd api-server
 PORT=5000 pnpm dev
 
 # Terminal 2: App Gestor

@@ -1,4 +1,4 @@
-// artifacts/api-server/src/routes/delivery-invite.ts
+// api-server/src/routes/delivery-invite.ts
 import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
 import { requireOwnerAuth } from "./auth";

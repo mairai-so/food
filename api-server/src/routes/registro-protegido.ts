@@ -1,4 +1,4 @@
-// artifacts/api-server/src/routes/registro-protegido.ts
+// api-server/src/routes/registro-protegido.ts
 //
 // REGISTRO PROTEGIDO — "Livro-caixa" de quem fez o quê.
 // - Gravação SEMPRE ativa (não há como desligar).

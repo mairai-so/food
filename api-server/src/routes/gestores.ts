@@ -1,4 +1,4 @@
-// artifacts/api-server/src/routes/gestores.ts
+// api-server/src/routes/gestores.ts
 //
 // Cadastro de GESTOR (sócio). Sócio é gestor, gestor é dono: entra no app do
 // gestor, com senha obrigatória, e recebe a chave mestra. Criado por cadastro
