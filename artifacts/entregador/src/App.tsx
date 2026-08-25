@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bike, MapPin, Package, CheckCircle2, Clock, LogOut, RefreshCw, Navigation, ToggleLeft, ToggleRight } from 'lucide-react';
 import { IdiomaProvider, useTranslation } from './i18n/IdiomaContext';
 import { ConfigFlutuante } from './i18n/ConfigFlutuante';
+import { EmployeePasskeyPrompt } from './components/EmployeePasskeyPrompt';
 
 const queryClient = new QueryClient();
 
@@ -277,6 +278,7 @@ function DeliveryBoard({ token, name, onLogout }: { token: string; name: string;
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('miar-entregador-token') ?? sessionStorage.getItem('miar-entregador-token') ?? '');
   const [name, setName] = useState(() => localStorage.getItem('miar-entregador-name') ?? sessionStorage.getItem('miar-entregador-name') ?? '');
+  const [showPasskey, setShowPasskey] = useState(false);
   // Corrigido (20/08/2026) — achado testando o convite de verdade: o
   // backend já gera o link com o token embutido (/entregador/?token=...),
   // mas essa tela nunca olhava pra URL, só pra localStorage/digitação
@@ -285,12 +287,13 @@ function App() {
   const [autoLoginStatus, setAutoLoginStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [autoLoginError, setAutoLoginError] = useState('');
 
-  const onLogin = (t: string, n: string, remember: boolean) => {
+  const onLogin = (t: string, n: string, remember = true) => {
     const storage = remember ? localStorage : sessionStorage;
     const otherStorage = remember ? sessionStorage : localStorage;
     otherStorage.removeItem('miar-entregador-token'); otherStorage.removeItem('miar-entregador-name');
     storage.setItem('miar-entregador-token', t); storage.setItem('miar-entregador-name', n);
     setToken(t); setName(n);
+    if (!localStorage.getItem('miar-entregador-passkey-prompted')) setShowPasskey(true);
   };
   const onLogout = () => { localStorage.removeItem('miar-entregador-token'); localStorage.removeItem('miar-entregador-name'); setToken(''); setName(''); };
 
@@ -342,6 +345,7 @@ function App() {
           <TokenLogin onLogin={onLogin} initialError={autoLoginStatus === 'error' ? autoLoginError : undefined} />
         )}
         <ConfigFlutuante />
+        {showPasskey && token && <EmployeePasskeyPrompt token={token} onDone={() => { localStorage.setItem('miar-entregador-passkey-prompted', '1'); setShowPasskey(false); }} />}
         <Toaster />
       </QueryClientProvider>
     </IdiomaProvider>

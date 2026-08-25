@@ -7,6 +7,7 @@ import SeletorLoja from './components/SeletorLoja';
 import { FloatingChat } from '@/components/FloatingChat';
 import { IdiomaProvider, useTranslation } from './i18n/IdiomaContext';
 import { ConfigFlutuante } from './i18n/ConfigFlutuante';
+import { EmployeePasskeyPrompt } from './components/EmployeePasskeyPrompt';
 
 const queryClient = new QueryClient();
 
@@ -539,6 +540,7 @@ function WaiterBoard({ token, name, onLogout }: { token: string; name: string; o
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('miar-garcom-token') ?? sessionStorage.getItem('miar-garcom-token') ?? '');
   const [name, setName] = useState(() => localStorage.getItem('miar-garcom-name') ?? sessionStorage.getItem('miar-garcom-name') ?? '');
+  const [showPasskey, setShowPasskey] = useState(false);
 
   const onLogin = (t: string, n: string, remember: boolean) => {
     const storage = remember ? localStorage : sessionStorage;
@@ -546,6 +548,7 @@ function App() {
     otherStorage.removeItem('miar-garcom-token'); otherStorage.removeItem('miar-garcom-name');
     storage.setItem('miar-garcom-token', t); storage.setItem('miar-garcom-name', n);
     setToken(t); setName(n);
+    if (!localStorage.getItem('miar-garcom-passkey-prompted')) setShowPasskey(true);
   };
   const onLogout = () => { localStorage.removeItem('miar-garcom-token'); localStorage.removeItem('miar-garcom-name'); setToken(''); setName(''); };
 
@@ -573,6 +576,7 @@ function App() {
     <IdiomaProvider>
       <QueryClientProvider client={queryClient}>
         {token ? <WaiterBoard token={token} name={name} onLogout={onLogout} /> : <PinLogin onLogin={onLogin} />}
+        {showPasskey && token && <EmployeePasskeyPrompt token={token} onDone={() => { localStorage.setItem('miar-garcom-passkey-prompted', '1'); setShowPasskey(false); }} />}
         <ConfigFlutuante />
         <Toaster />
       </QueryClientProvider>
