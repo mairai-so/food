@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" role="img" aria-labelledby="title desc">
+  <title id="title">ECOSSISTEMA MIAR AI SOLUCIONA</title>
+  <desc id="desc">Marca do Ecossistema MIAR AI Soluciona: um M formado por trajetórias conectadas.</desc>
+  <defs>
+    <linearGradient id="mark" x1="24" y1="24" x2="208" y2="216" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#78FFD6" />
+      <stop offset="0.58" stop-color="#21D4A3" />
+      <stop offset="1" stop-color="#FF806B" />
+    </linearGradient>
+    <linearGradient id="word" x1="270" y1="48" x2="835" y2="190" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4FFF9" />
+      <stop offset="1" stop-color="#BDEFE0" />
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+  <rect width="920" height="240" rx="36" fill="#071A22" />
+  <g transform="translate(22 22)" filter="url(#glow)">
+    <path d="M24 168V42l48 61 48-61v126" fill="none" stroke="url(#mark)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M24 108h48l48-66M72 103l48 65" fill="none" stroke="#F4FFF9" stroke-opacity=".84" stroke-width="5" stroke-linecap="round" />
+    <circle cx="24" cy="42" r="9" fill="#78FFD6" />
+    <circle cx="72" cy="103" r="9" fill="#F4FFF9" />
+    <circle cx="120" cy="42" r="9" fill="#FF806B" />
+    <circle cx="120" cy="168" r="9" fill="#21D4A3" />
+  </g>
+  <g fill="url(#word)" font-family="Space Grotesk, Avenir Next, sans-serif">
+    <text x="250" y="103" font-size="45" font-weight="700" letter-spacing="2">ECOSSISTEMA</text>
+    <text x="250" y="158" font-size="49" font-weight="700" letter-spacing="1">MIAR AI</text>
+    <text x="250" y="196" font-size="25" font-weight="500" letter-spacing="7" fill="#FF9A83">SOLUCIONA</text>
+  </g>
+</svg>

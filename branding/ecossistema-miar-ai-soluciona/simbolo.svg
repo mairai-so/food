@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Símbolo do Ecossistema MIAR AI Soluciona</title>
+  <desc id="desc">Um M formado por trajetórias conectadas.</desc>
+  <defs>
+    <linearGradient id="bg" x1="22" y1="18" x2="234" y2="238" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102F38" />
+      <stop offset="1" stop-color="#071A22" />
+    </linearGradient>
+    <linearGradient id="mark" x1="42" y1="42" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#78FFD6" />
+      <stop offset="0.58" stop-color="#21D4A3" />
+      <stop offset="1" stop-color="#FF806B" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="58" fill="url(#bg)" />
+  <path d="M43 185V69l43 55 43-55v116" fill="none" stroke="url(#mark)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M43 130h43l43-61M86 124l43 61" fill="none" stroke="#F4FFF9" stroke-opacity=".9" stroke-width="5" stroke-linecap="round" />
+  <circle cx="43" cy="69" r="10" fill="#78FFD6" />
+  <circle cx="86" cy="124" r="10" fill="#F4FFF9" />
+  <circle cx="129" cy="69" r="10" fill="#FF806B" />
+  <circle cx="129" cy="185" r="10" fill="#21D4A3" />
+</svg>
