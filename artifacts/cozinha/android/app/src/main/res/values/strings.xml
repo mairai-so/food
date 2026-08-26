@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MIAR Cozinha</string>
+    <string name="title_activity_main">MIAR Cozinha</string>
+    <string name="package_name">br.miarai.food.cozinha</string>
+    <string name="custom_url_scheme">br.miarai.food.cozinha</string>
+</resources>
